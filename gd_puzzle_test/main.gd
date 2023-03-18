@@ -2,6 +2,10 @@ extends Node2D
 # ===========================
 # メインシーン.
 # ===========================
+# ---------------------------------------
+# const.
+# ---------------------------------------
+const TIMER_SHAKE = 0.5
 
 # ---------------------------------------
 # preload.
@@ -9,15 +13,22 @@ extends Node2D
 const PLAYER_OBJ = preload("res://src/player/Player.tscn")
 const CRATE_OBJ = preload("res://src/crate/Crate.tscn")
 const KEY_OBJ = preload("res://src/key/Key.tscn")
+const SPIKE_OBJ = preload("res://src/spike/Spike.tscn")
 
 enum eState {
 	MAIN, # メイン.
 	STAGE_CLEAR, # ステージクリア.
+	WAIT, # 少し待つ.
+	GAME_OVER, # ゲームオーバー.
 }
 
 # ---------------------------------------
 # onready.
 # ---------------------------------------
+# オブジェクト.
+@onready var _camera = $Camera2D
+# UI.
+@onready var _ui_caption = $UILayer/Caption
 # キャンバスレイヤー.
 @onready var _tile_layer = $TileLayer
 @onready var _obj_layer = $ObjLayer
@@ -30,13 +41,14 @@ enum eState {
 var _timer = 0.0 # タイマー.
 var _state = eState.MAIN # 状態.
 var _player:Player = null
+var _timer_shake = 0.0
 
 # ---------------------------------------
 # private functions.
 # ---------------------------------------
 func _ready() -> void:
 	DisplayServer.window_set_size(Vector2i(1024*2, 600*2))
-	
+		
 	# レベルを読み込む.
 	var level_path = Common.get_level_scene()
 	var level_res = load(level_path)
@@ -91,6 +103,10 @@ func _create_obj(i:int, j:int, id:int) -> bool:
 			# カギ.
 			_create_keY(i, j)
 			return true
+		Field.eTile.SPIKE:
+			# トゲ.
+			_create_spike(i, j)
+			return true
 	
 	# 生成されていない.
 	return false
@@ -113,6 +129,12 @@ func _create_keY(i:int, j:int) -> void:
 	var key = KEY_OBJ.instantiate()
 	_obj_layer.add_child(key)
 	key.setup(i, j)
+	
+## トゲの生成.
+func _create_spike(i:int, j:int) -> void:
+	var spike = SPIKE_OBJ.instantiate()
+	_obj_layer.add_child(spike)
+	spike.setup(i, j)
 
 ## 更新.
 func _process(delta:float) -> void:
@@ -121,14 +143,24 @@ func _process(delta:float) -> void:
 			_update_main(delta)
 		eState.STAGE_CLEAR:
 			_update_stage_clear()
+		eState.WAIT:
+			_update_wait(delta)
+		eState.GAME_OVER:
+			_update_gameover(delta)
+			
+	if Input.is_action_just_pressed("ui_restart"):
+		# リセットボタン.
+		var _ret = get_tree().change_scene_to_file("res://Main.tscn")
 	
 ## 更新 > メイン.
 func _update_main(delta:float) -> void:
 	_timer += delta
 	
-	if Input.is_action_just_pressed("ui_restart"):
-		# リセットボタン.
-		var _ret = get_tree().change_scene_to_file("res://Main.tscn")
+	if _player.request_kill:
+		# ゲームオーバー.
+		_state = eState.WAIT
+		_timer = 0
+		return
 	
 	# プレイヤーの更新.
 	_player.proc(delta)
@@ -146,7 +178,7 @@ func _update_main(delta:float) -> void:
 	
 	# UIの更新.
 	#_update_ui(delta)
-	
+
 ## 更新 > ステージクリア.
 func _update_stage_clear() -> void:
 	# キャプションを表示する.
@@ -163,3 +195,33 @@ func _update_stage_clear() -> void:
 			# 全ステージクリアしたら最初から.
 			Common.reset_level()
 		var _ret = get_tree().change_scene_to_file("res://Main.tscn")
+
+func _update_wait(delta:float) -> void:
+	_player.proc(delta)
+	_timer += delta
+	if _timer > 0.5:
+		_player.vanish()
+		_start_gameover()
+
+func _update_gameover(delta:float) -> void:
+	_ui_caption.visible_ratio += delta
+	
+	if _timer_shake > 0:
+		_timer_shake -= delta
+		var t = (_timer_shake / TIMER_SHAKE)
+		var n = int(t*15)
+		var dx = 48 * t
+		if n%2 == 0:
+			dx *= -1
+		_camera.offset.x = dx
+		_camera.offset.y = randf_range(-24*t, 24*t)
+		
+		if _timer_shake <= 0:
+			_camera.offset = Vector2.ZERO
+
+func _start_gameover() -> void:
+	_ui_caption.visible_ratio = 0
+	_ui_caption.visible = true
+	_state = eState.GAME_OVER
+	
+	_timer_shake = TIMER_SHAKE

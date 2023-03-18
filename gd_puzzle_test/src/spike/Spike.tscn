@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://bpx5h2x4r4mq8"]
+
+[ext_resource type="Script" path="res://src/spike/Spike.gd" id="1_2lvyf"]
+[ext_resource type="Texture2D" uid="uid://dqao7vdmyo00c" path="res://assets/images/spike.png" id="2_eefq5"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4e4nk"]
+radius = 24.0
+
+[node name="Spike" type="Area2D"]
+script = ExtResource("1_2lvyf")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_eefq5")
+centered = false
+hframes = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(32, 32)
+shape = SubResource("CircleShape2D_4e4nk")
+
+[connection signal="area_entered" from="." to="." method="_on_area_entered"]

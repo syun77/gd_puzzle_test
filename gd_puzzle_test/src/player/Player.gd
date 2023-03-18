@@ -24,11 +24,30 @@ const EFFECT_LOCK_OBJ = preload("res://src/effect/EffectLock.tscn")
 # ---------------------------------------
 var _anim_timer = 0
 var _key:Key = null
+var _timer2 = 0.0
 
 # ---------------------------------------
 # public functions.
 # ---------------------------------------
+func vanish() -> void:
+	var pos = Field.idx_to_world(_point, true)
+	Common.start_particle(pos, 1.0, Color.MAGENTA, 2.0)
+	Common.start_particle_ring(pos, 1.0, Color.MAGENTA, 8.0)
+	
+	queue_free()
+
 func proc(delta:float) -> void:
+	if request_kill:
+		modulate = Color.RED
+		_timer2 += delta
+		var t = 0.5 - _timer2
+		if t > 0:
+			var v = t * 4
+			_spr.offset.x = randf_range(-v, v)
+			_spr.offset.y = randf_range(-v, v)
+		visible = int(_timer2*20)%2 == 0
+		return # 操作できない.
+	
 	_anim_timer += delta
 
 	match _state:
@@ -107,7 +126,7 @@ func _check_use_key() -> bool:
 		var effect = EFFECT_LOCK_OBJ.instantiate()
 		Common.get_layer("effect").add_child(effect)
 		effect.setup(forward)
-		_key.queue_free()
+		_key.vanish()
 		_key = null
 		return true
 	# 使わない.
@@ -171,6 +190,16 @@ func _get_anim_id(idx:int) -> int:
 	return tbl[idx]
 
 # ---------------------------------------
+# properties.
+# ---------------------------------------
+## 死亡リクエスト
+var request_kill:bool = false:
+	set(b):
+		request_kill = b
+	get:
+		return request_kill
+
+# ---------------------------------------
 # signal functions.
 # ---------------------------------------
 func _on_area_entered(area):
@@ -178,3 +207,5 @@ func _on_area_entered(area):
 		# カギGet.
 		_key = area
 		_key.carried = true # 運んでいる.
+	if area is Spike:
+		request_kill = true

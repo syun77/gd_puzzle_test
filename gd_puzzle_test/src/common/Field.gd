@@ -51,6 +51,8 @@ enum eTile {
 	
 	# アイテム.
 	KEY = 15,
+	
+	SPIKE = 16,
 
 	# プレイヤー
 	START = 20, # 開始地点

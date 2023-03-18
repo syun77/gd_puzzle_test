@@ -6,7 +6,13 @@ class_name Key
 ## セットアップ.
 func setup(i:int, j:int) -> void:
 	set_pos(i, j, false)
-
+	
+func vanish() -> void:
+	var pos = Field.idx_to_world(_point, true)
+	Common.start_particle(pos, 0.5, Color.YELLOW, 1.0)
+	Common.start_particle_ring(pos, 0.8, Color.YELLOW, 4.0)
+	queue_free()
+	
 ## 更新
 func proc(delta: float) -> void:
 	match _state:
