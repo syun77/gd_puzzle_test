@@ -106,16 +106,16 @@ func move_crate(i:int, j:int, dx:int, dy:int) -> void:
 	var crate = search_crate(i, j)
 	var xnext = i + dx
 	var ynext = j + dy
-	crate.set_pos(xnext, ynext, false)
+	crate.request_move(xnext, ynext)
 
 ## インデックスX座標をワールドX座標に変換する.
-func idx_to_world_x(i:int, is_center:bool=false) -> float:
+func idx_to_world_x(i:float, is_center:bool=false) -> float:
 	var i2 = i
 	if is_center:
 		i2 += 0.5	
 	return FIELD_OFS_X + (i2 * TILE_SIZE)
 ## インデックスY座標をワールドY座標に変換する.
-func idx_to_world_y(j:int, is_center:bool=false) -> float:
+func idx_to_world_y(j:float, is_center:bool=false) -> float:
 	var j2 = j
 	if is_center:
 		j2 += 0.5	

@@ -6,6 +6,14 @@ extends GridObject
 
 class_name Player
 # ---------------------------------------
+# consts.
+# ---------------------------------------
+enum eState {
+	STANDBY,
+	MOVING,
+}
+
+# ---------------------------------------
 # preload.
 # ---------------------------------------
 
@@ -17,6 +25,8 @@ class_name Player
 # ---------------------------------------
 # vars.
 # ---------------------------------------
+var _state := eState.STANDBY
+var _timer = 0.0
 var _anim_timer = 0
 
 # ---------------------------------------
@@ -25,24 +35,11 @@ var _anim_timer = 0
 func proc(delta:float) -> void:
 	_anim_timer += delta
 
-	# キーの入力判定.
-	var is_moving = false
-	if Input.is_action_just_pressed("ui_left"):
-		_dir = Direction.eType.LEFT
-		is_moving = true
-	elif Input.is_action_just_pressed("ui_up"):
-		_dir = Direction.eType.UP
-		is_moving = true
-	elif Input.is_action_just_pressed("ui_right"):
-		_dir = Direction.eType.RIGHT
-		is_moving = true
-	elif Input.is_action_just_pressed("ui_down"):
-		_dir = Direction.eType.DOWN		
-		is_moving = true
-	
-	if is_moving:
-		# 移動する.
-		_move()
+	match _state:
+		eState.STANDBY:
+			_update_standby(delta)
+		eState.MOVING:
+			_update_moving(delta)
 		
 	_spr.frame = _get_anim_id(int(_anim_timer*4)%2)
 	
@@ -52,8 +49,40 @@ func proc(delta:float) -> void:
 func _ready() -> void:
 	pass
 
+## 更新 > 停止中.
+func _update_standby(delta:float) -> void:
+	# キーの入力判定.
+	var is_moving = false
+	if Input.is_action_pressed("ui_left"):
+		_dir = Direction.eType.LEFT
+		is_moving = true
+	elif Input.is_action_pressed("ui_up"):
+		_dir = Direction.eType.UP
+		is_moving = true
+	elif Input.is_action_pressed("ui_right"):
+		_dir = Direction.eType.RIGHT
+		is_moving = true
+	elif Input.is_action_pressed("ui_down"):
+		_dir = Direction.eType.DOWN		
+		is_moving = true
+	
+	if is_moving:
+		# 移動する.
+		if _check_move():
+			_timer = 0
+			_state = eState.MOVING
+
+## 更新 > 移動中.
+func _update_moving(delta:float) -> void:
+	_timer = update_move(_timer, delta)
+	if _timer >= 1:
+		set_pos(_next_pos.x, _next_pos.y, false)
+		_state = eState.STANDBY
+	else:
+		set_pos(_point.x, _point.y, false)		
+
 ## 移動.
-func _move() -> void:
+func _check_move() -> bool:
 	# 移動先を調べる.
 	var prev_dir = _dir # 移動前の向き
 	var now = Vector2i(_point.x, _point.y)
@@ -62,6 +91,8 @@ func _move() -> void:
 	var d = Direction.to_vector(_dir)
 	next += d
 	
+	var can_move = false
+	
 	if Field.is_crate(next.x, next.y):
 		# 移動先が荷物.
 		if Field.can_move_crate(next.x, next.y, d.x, d.y):
@@ -69,11 +100,17 @@ func _move() -> void:
 			# 荷物を動かす.
 			Field.move_crate(next.x, next.y, d.x, d.y)
 			# プレイヤーも動かす.
-			set_pos(next.x, next.y, false)
+			can_move = true
 		
 	elif Field.can_move(next.x, next.y):
 		# 移動可能.
-		set_pos(next.x, next.y, false)
+		can_move = true
+	
+	if can_move:
+		# 移動先覚えておく.
+		_prev_pos = now
+		_next_pos = next
+	return can_move
 
 ## アニメーションIDを取得する.
 func _get_anim_id(idx:int) -> int:

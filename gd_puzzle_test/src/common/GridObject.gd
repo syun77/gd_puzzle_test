@@ -13,14 +13,16 @@ class_name GridObject
 # ---------------------------------------
 # vars.
 # ---------------------------------------
-var _point = Vector2i.ZERO
+var _point = Vector2.ZERO
 var _dir:int = Direction.eType.DOWN
+var _prev_pos = Vector2i.ZERO
+var _next_pos = Vector2i.ZERO
 
 # ---------------------------------------
 # public functions.
 # ---------------------------------------
 ## グリッド座標系を設定.	
-func set_pos(i:int, j:int, is_center:bool) -> void:
+func set_pos(i:float, j:float, is_center:bool) -> void:
   # グリッド座標系をワールド座標に変換して描画座標に反映する.
 	position.x = Field.idx_to_world_x(i, is_center)
 	position.y = Field.idx_to_world_y(j, is_center)
@@ -44,3 +46,10 @@ func idx_x() -> int:
 ## グリッド座標系のYを取得する.
 func idx_y() -> int:
 	return _point.y
+
+## 共通移動処理.
+func update_move(t:float, delta:float) -> float:
+	t += delta * 7
+	_point = lerp(Vector2(_prev_pos), Vector2(_next_pos), Ease.cube_out(t))
+	
+	return t
