@@ -49,12 +49,13 @@ func _ready() -> void:
 	# タイルの情報からインスタンスを生成する.	
 	for j in range(Field.TILE_HEIGHT):
 		for i in range(Field.TILE_WIDTH):
-			var data:TileData = tilemap.get_cell_tile_data(1, Vector2i(i, j))
+			var data:TileData = tilemap.get_cell_tile_data(Field.eTileLayer.OBJECT, Vector2i(i, j))
 			if data == null:
 				continue
 			
-			var v = data.get_custom_data("Terrain") as int
+			var v = data.get_custom_data(Field.CUSTOM_NAME) as int
 			if _create_obj(i, j, v):
+				print("create obj: %d (%d, %d)"%[v, i, j])
 				# 生成したらタイルの情報は消しておく.
 				tilemap.set_cell(Field.eTileLayer.OBJECT, Vector2i(i, j), Field.eTile.NONE)
 	

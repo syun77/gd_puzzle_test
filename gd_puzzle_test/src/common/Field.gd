@@ -14,8 +14,10 @@ const TILE_SIZE = 64.0
 
 const FIELD_OFS_X = 0
 const FIELD_OFS_Y = 0
-const TILE_WIDTH = 12
-const TILE_HEIGHT = 8
+const TILE_WIDTH = 18
+const TILE_HEIGHT = 10
+
+const CUSTOM_NAME = "Terrain"
 
 # ---------------------------------------
 # enum.
@@ -56,7 +58,11 @@ func setup(tile:TileMap) -> void:
 	_tile = tile
 
 func get_cell(i:int, j:int) -> int:
-	return _tile.get_cell_source_id(0, Vector2i(i, j))
+	var data = _tile.get_cell_tile_data(eTileLayer.BACKGROUND, Vector2i(i, j))
+	if data == null:
+		return eTile.NONE
+	var v:int = data.get_custom_data(CUSTOM_NAME)
+	return v
 
 ## 移動可能な位置かどうか.
 func can_move(i:int, j:int) -> bool:
@@ -100,7 +106,7 @@ func move_crate(i:int, j:int, dx:int, dy:int) -> void:
 	var crate = search_crate(i, j)
 	var xnext = i + dx
 	var ynext = j + dy
-	crate.set_pos(xnext, ynext, true)
+	crate.set_pos(xnext, ynext, false)
 
 ## インデックスX座標をワールドX座標に変換する.
 func idx_to_world_x(i:int, is_center:bool=false) -> float:
@@ -123,13 +129,14 @@ func idx_to_world(p:Vector2i, is_center:bool=false) -> Vector2:
 
 ## 何もない場所をランダムで返す.
 func search_random_none() -> Vector2i:
+	print("ランダムな場所に出現させます")
 	var arr = []
 	for j in range(TILE_HEIGHT):
 		for i in range(TILE_WIDTH):
 			var canPut = true
 			for k in range(Field.eTileLayer.MAX):
 				var data:TileData = _tile.get_cell_tile_data(Field.eTileLayer.BACKGROUND, Vector2i(i, j))
-				var v = data.get_custom_data("Terrain")
+				var v = data.get_custom_data(Field.CUSTOM_NAME)
 				if v == eTile.NONE:
 					canPut = false # 何かがある
 			if canPut:

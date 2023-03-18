@@ -35,7 +35,7 @@ func set_dir(dir:int) -> void:
 
 ## 指定の座標と一致しているかどうか.
 func is_same_pos(i:int, j:int) -> bool:
-	return _point.equal_xy(i, j)
+	return _point.x == i and _point.y == j
 
 ## グリッド座標系のXを取得する.
 func idx_x() -> int:
