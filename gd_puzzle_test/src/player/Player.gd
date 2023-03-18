@@ -127,3 +127,11 @@ func _get_anim_id(idx:int) -> int:
 			tbl = [12, 13]
 			
 	return tbl[idx]
+
+# ---------------------------------------
+# signal functions.
+# ---------------------------------------
+func _on_area_entered(area):
+	if area is Key:
+		# カギGet.
+		area.queue_free()

@@ -8,6 +8,7 @@ extends Node2D
 # ---------------------------------------
 const PLAYER_OBJ = preload("res://src/player/Player.tscn")
 const CRATE_OBJ = preload("res://src/crate/Crate.tscn")
+const KEY_OBJ = preload("res://src/key/Key.tscn")
 
 enum eState {
 	MAIN, # メイン.
@@ -82,6 +83,10 @@ func _create_obj(i:int, j:int, id:int) -> bool:
 			# 荷物.
 			_create_crate(i, j, id)
 			return true
+		Field.eTile.KEY:
+			# カギ.
+			_create_keY(i, j)
+			return true
 	
 	# 生成されていない.
 	return false
@@ -98,6 +103,12 @@ func _create_crate(i:int, j:int, id:int) -> void:
 	# Spriteの更新があるので先に add_child() する.
 	_crate_layer.add_child(crate)
 	crate.setup(i, j, id)
+	
+## カギの生成.
+func _create_keY(i:int, j:int) -> void:
+	var key = KEY_OBJ.instantiate()
+	_obj_layer.add_child(key)
+	key.setup(i, j)
 
 ## 更新.
 func _process(delta:float) -> void:

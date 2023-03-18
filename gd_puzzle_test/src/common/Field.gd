@@ -33,13 +33,18 @@ enum eTile {
 	NONE = -1,
 	
 	BLANK = 0, # 通路
+	
 	BLOCK = 1, # 壁
+	LOCK  = 2, # カギのかかった扉.
 	
 	# 荷物
 	CRATE1 = 10,
 	CRATE2 = 11,
 	CRATE3 = 12,
 	CRATE4 = 13,
+	
+	# アイテム.
+	KEY = 15,
 
 	# プレイヤー
 	START = 20, # 開始地点
@@ -67,7 +72,7 @@ func get_cell(i:int, j:int) -> int:
 ## 移動可能な位置かどうか.
 func can_move(i:int, j:int) -> bool:
 	match get_cell(i, j):
-		eTile.BLOCK:
+		eTile.BLOCK, eTile.LOCK:
 			return false # 壁がある.
 		_:
 			if is_crate(i, j):
