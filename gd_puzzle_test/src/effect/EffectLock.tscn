@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://b86rtw88gu515"]
+
+[ext_resource type="Texture2D" uid="uid://6gumsg6yv1xl" path="res://assets/images/lock.png" id="1_jr6rk"]
+[ext_resource type="Script" path="res://src/effect/EffectLock.gd" id="2_66cni"]
+
+[node name="EffectLock" type="Sprite2D"]
+texture = ExtResource("1_jr6rk")
+script = ExtResource("2_66cni")

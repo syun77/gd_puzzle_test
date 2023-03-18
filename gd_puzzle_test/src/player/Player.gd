@@ -16,6 +16,7 @@ enum eState {
 # ---------------------------------------
 # preload.
 # ---------------------------------------
+const EFFECT_LOCK_OBJ = preload("res://src/effect/EffectLock.tscn")
 
 # ---------------------------------------
 # onready.
@@ -112,6 +113,9 @@ func _check_use_key() -> bool:
 	if v == Field.eTile.LOCK:
 		# 目の前がロックなのでカギを使う.
 		Field.erase_cell(forward.x, forward.y)
+		var effect = EFFECT_LOCK_OBJ.instantiate()
+		Common.get_layer("effect").add_child(effect)
+		effect.setup(forward)
 		_key.queue_free()
 		_key = null
 		return true

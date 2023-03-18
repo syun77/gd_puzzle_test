@@ -11,4 +11,6 @@ script = ExtResource("1_1e6qi")
 
 [node name="ObjLayer" type="CanvasLayer" parent="."]
 
+[node name="EffectLayer" type="CanvasLayer" parent="."]
+
 [node name="UILayer" type="CanvasLayer" parent="."]

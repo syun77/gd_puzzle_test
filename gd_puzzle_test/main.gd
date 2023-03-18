@@ -21,6 +21,7 @@ enum eState {
 # キャンバスレイヤー.
 @onready var _tile_layer = $TileLayer
 @onready var _obj_layer = $ObjLayer
+@onready var _effect_layer = $EffectLayer
 @onready var _crate_layer = $CrateLayer
 
 # ---------------------------------------
@@ -68,7 +69,10 @@ func _ready() -> void:
 	
 	# 共通モジュールをセットアップする.
 	var layers = {
+		"tile": _tile_layer,
 		"crate": _crate_layer,
+		"obj": _obj_layer,
+		"effect": _effect_layer,
 	}
 	Common.setup(_player, layers)
 
