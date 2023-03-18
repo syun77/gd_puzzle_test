@@ -37,6 +37,12 @@ enum eTile {
 	BLOCK = 1, # 壁
 	LOCK  = 2, # カギのかかった扉.
 	
+	# ベルトコンベア.
+	CONVEYOR_BELT_L = 3, # 左.
+	CONVEYOR_BELT_U = 4, # 上.
+	CONVEYOR_BELT_R = 5, # 右.
+	CONVEYOR_BELT_D = 6, # 下.
+	
 	# 荷物
 	CRATE1 = 10,
 	CRATE2 = 11,
@@ -49,6 +55,24 @@ enum eTile {
 	# プレイヤー
 	START = 20, # 開始地点
 }
+
+## ベルトコンベアかどうか.
+func is_conveyor_belt(tile:eTile) -> bool:
+	var tbl = [
+		eTile.CONVEYOR_BELT_L, # 左.
+		eTile.CONVEYOR_BELT_U, # 上.
+		eTile.CONVEYOR_BELT_R, # 右.
+		eTile.CONVEYOR_BELT_D, # 下.
+	]
+	return tile in tbl
+func conveyor_belt_to_dir(tile:eTile) -> Direction.eType:
+	var tbl = {
+		eTile.CONVEYOR_BELT_L: Direction.eType.LEFT, # 左.
+		eTile.CONVEYOR_BELT_U: Direction.eType.UP, # 上.
+		eTile.CONVEYOR_BELT_R: Direction.eType.RIGHT, # 右.
+		eTile.CONVEYOR_BELT_D: Direction.eType.DOWN, # 下.
+	}
+	return tbl[tile]
 
 # ---------------------------------------
 # vars.
@@ -82,6 +106,9 @@ func can_move(i:int, j:int) -> bool:
 		_:
 			if is_crate(i, j):
 				return false # 荷物がある.
+			var crate = search_crate(i, j)
+			if crate != null and crate.can_move() == false:
+				return false # 動かせない.
 			return true
 
 ## 荷物があるかどうか.
@@ -112,11 +139,11 @@ func can_move_crate(i:int, j:int, dx:int, dy:int) -> bool:
 	return true # 動かせる.
 	
 ## 荷物を動かす.
-func move_crate(i:int, j:int, dx:int, dy:int) -> void:
+func move_crate(i:int, j:int, dx:int, dy:int) -> bool:
 	var crate = search_crate(i, j)
 	var xnext = i + dx
 	var ynext = j + dy
-	crate.request_move(xnext, ynext)
+	return crate.request_move(xnext, ynext)
 
 ## インデックスX座標をワールドX座標に変換する.
 func idx_to_world_x(i:float, is_center:bool=false) -> float:

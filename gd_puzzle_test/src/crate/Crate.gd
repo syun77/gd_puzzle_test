@@ -51,8 +51,17 @@ func setup(i:int, j:int, type:int) -> void:
 	_spr.frame = _get_anim_idx()
 	set_pos(i, j, false)
 
+## 動かせるかどうか.
+func can_move() -> bool:
+	if _state != eState.STANDBY:
+		return false # 動かせない.
+	return true
+
 ## 移動要求.
-func request_move(i:int, j:int) -> void:
+func request_move(i:int, j:int) -> bool:
+	if can_move() == false:
+		return false
+	
 	_request_move = true
 	_prev_pos = _point
 	_next_pos.x = i
@@ -60,6 +69,7 @@ func request_move(i:int, j:int) -> void:
 	
 	# 要求判定.
 	proc(0)
+	return true
 
 ## 更新
 func proc(delta: float) -> void:

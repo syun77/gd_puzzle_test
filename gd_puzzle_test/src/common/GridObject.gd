@@ -9,6 +9,13 @@ class_name GridObject
 # preload.
 # ---------------------------------------
 
+# ---------------------------------------
+# consts.
+# --------------------------------------
+enum eMove {
+	DEFALUT,
+	LINEAR,
+}
 
 # ---------------------------------------
 # vars.
@@ -52,8 +59,13 @@ func idx_y() -> int:
 	return _point.y
 
 ## 共通移動処理.
-func update_move(t:float, delta:float) -> float:
-	t += delta * 7
-	_point = lerp(Vector2(_prev_pos), Vector2(_next_pos), Ease.cube_out(t))
+func update_move(t:float, delta:float, type:eMove=eMove.DEFALUT) -> float:
+	match type:
+		eMove.LINEAR:
+			t += delta * 7
+			_point = lerp(Vector2(_prev_pos), Vector2(_next_pos), t)
+		_:
+			t += delta * 7
+			_point = lerp(Vector2(_prev_pos), Vector2(_next_pos), Ease.cube_out(t))
 	
 	return t
