@@ -11,10 +11,20 @@ config_version=5
 [application]
 
 config/name="Puzzle Test"
-run/main_scene="res://main.tscn"
+run/main_scene="res://Main.tscn"
 config/features=PackedStringArray("4.0", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Direction="*res://src/common/Direction.gd"
+Common="*res://src/common/Common.gd"
+Field="*res://src/common/Field.gd"
 
 [display]
 
 window/stretch/mode="viewport"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
