@@ -69,6 +69,11 @@ func get_cell(i:int, j:int) -> int:
 	var v:int = data.get_custom_data(CUSTOM_NAME)
 	return v
 
+func erase_cell(i:int, j:int) -> void:
+	var source_id = 0
+	var atlas_coords = Vector2i(1, 0)
+	_tile.set_cell(eTileLayer.BACKGROUND, Vector2i(i, j), source_id, atlas_coords)
+
 ## 移動可能な位置かどうか.
 func can_move(i:int, j:int) -> bool:
 	match get_cell(i, j):

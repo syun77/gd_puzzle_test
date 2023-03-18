@@ -28,6 +28,7 @@ enum eState {
 var _state := eState.STANDBY
 var _timer = 0.0
 var _anim_timer = 0
+var _key:Key = null
 
 # ---------------------------------------
 # public functions.
@@ -42,6 +43,9 @@ func proc(delta:float) -> void:
 			_update_moving(delta)
 		
 	_spr.frame = _get_anim_id(int(_anim_timer*4)%2)
+	
+	# カギ持っている場合の更新.
+	_update_key()	
 	
 # ---------------------------------------
 # private functions.
@@ -71,6 +75,13 @@ func _update_standby(delta:float) -> void:
 		if _check_move():
 			_timer = 0
 			_state = eState.MOVING
+			return
+	
+	if Input.is_action_just_pressed("ui_accept"):
+		# 決定ボタン.
+		if is_instance_valid(_key):
+			# 鍵を持っていたら地面に置く.
+			_put_key()
 
 ## 更新 > 移動中.
 func _update_moving(delta:float) -> void:
@@ -81,6 +92,41 @@ func _update_moving(delta:float) -> void:
 	else:
 		set_pos(_point.x, _point.y, false)		
 
+## カギを持っているときの更新
+func _update_key() -> void:
+	if is_instance_valid(_key) == false:
+		return # 持っていない.
+	
+	if _state == eState.STANDBY:
+		# カギの使用チェック.
+		if _check_use_key():
+			return
+		
+	var pos = Vector2(_point.x, _point.y)
+	pos += Direction.to_vector(_dir) * 0.5
+	_key.set_pos(pos.x, pos.y, false)
+
+func _check_use_key() -> bool:
+	var forward = forward_pos()
+	var v = Field.get_cell(forward.x, forward.y)
+	if v == Field.eTile.LOCK:
+		# 目の前がロックなのでカギを使う.
+		Field.erase_cell(forward.x, forward.y)
+		_key.queue_free()
+		_key = null
+		return true
+	# 使わない.
+	return false
+
+
+## カギを置く.
+func _put_key() -> void:
+	var pos = forward_pos()
+	if Field.can_move(pos.x, pos.y):
+		# 移動可能なので置ける.
+		_key.set_pos(pos.x, pos.y, false)
+		_key = null
+
 ## 移動.
 func _check_move() -> bool:
 	# 移動先を調べる.
@@ -88,7 +134,7 @@ func _check_move() -> bool:
 	var now = Vector2i(_point.x, _point.y)
 	var next = Vector2i(_point.x, _point.y)
 	# 移動方向.
-	var d = Direction.to_vector(_dir)
+	var d = Direction.to_vectori(_dir)
 	next += d
 	
 	var can_move = false
@@ -134,4 +180,4 @@ func _get_anim_id(idx:int) -> int:
 func _on_area_entered(area):
 	if area is Key:
 		# カギGet.
-		area.queue_free()
+		_key = area

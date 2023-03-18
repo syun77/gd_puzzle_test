@@ -122,9 +122,9 @@ func _process(delta:float) -> void:
 func _update_main(delta:float) -> void:
 	_timer += delta
 	
-	if Input.is_action_just_pressed("ui_reset"):
+	if Input.is_action_just_pressed("ui_restart"):
 		# リセットボタン.
-		var _ret = get_tree().change_scene("res://Main.tscn")
+		var _ret = get_tree().change_scene_to_file("res://Main.tscn")
 	
 	# プレイヤーの更新.
 	_player.proc(delta)

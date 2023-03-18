@@ -7,8 +7,8 @@ script = ExtResource("1_1e6qi")
 
 [node name="TileLayer" type="CanvasLayer" parent="."]
 
-[node name="ObjLayer" type="CanvasLayer" parent="."]
-
 [node name="CrateLayer" type="CanvasLayer" parent="."]
+
+[node name="ObjLayer" type="CanvasLayer" parent="."]
 
 [node name="UILayer" type="CanvasLayer" parent="."]

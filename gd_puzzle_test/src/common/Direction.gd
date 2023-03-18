@@ -25,7 +25,18 @@ enum eType {
 # ---------------------------------------
 # public functions.
 # ---------------------------------------
-func to_vector(type:int) -> Vector2i:
+func to_vector(type:eType) -> Vector2:
+	match type:
+		eType.LEFT:
+			return Vector2.LEFT
+		eType.UP:
+			return Vector2.UP
+		eType.RIGHT:
+			return Vector2.RIGHT
+		_:
+			return Vector2.DOWN
+			
+func to_vectori(type:eType) -> Vector2i:
 	match type:
 		eType.LEFT:
 			return Vector2i.LEFT

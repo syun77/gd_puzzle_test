@@ -35,6 +35,10 @@ func set_pos(i:float, j:float, is_center:bool) -> void:
 func set_dir(dir:int) -> void:
 	_dir = dir
 
+## 前方の座標を取得する.
+func forward_pos() -> Vector2:
+	return _point + Direction.to_vector(_dir)
+
 ## 指定の座標と一致しているかどうか.
 func is_same_pos(i:int, j:int) -> bool:
 	return _point.x == i and _point.y == j
