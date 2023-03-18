@@ -133,6 +133,13 @@ func _update_main(delta:float) -> void:
 	# プレイヤーの更新.
 	_player.proc(delta)
 	
+	# オブジェクトの更新.
+	for obj in _obj_layer.get_children():
+		if obj is Player:
+			continue # プレイヤは除外.
+		if obj.has_method("proc"):
+			obj.proc(delta)
+	
 	# 荷物の更新.
 	for crate in _crate_layer.get_children():
 		crate.proc(delta)

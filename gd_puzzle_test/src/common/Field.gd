@@ -106,9 +106,6 @@ func can_move(i:int, j:int) -> bool:
 		_:
 			if is_crate(i, j):
 				return false # 荷物がある.
-			var crate = search_crate(i, j)
-			if crate != null and crate.can_move() == false:
-				return false # 動かせない.
 			return true
 
 ## 荷物があるかどうか.

@@ -10,10 +10,6 @@ class_name Crate
 # ---------------------------------------
 # const.
 # ---------------------------------------
-enum eState {
-	STANDBY,
-	MOVING,
-}
 
 # ---------------------------------------
 # enum.
@@ -34,8 +30,6 @@ enum eType {
 # vars.
 # ---------------------------------------
 var _type = eType.BROWN
-var _timer = 0.0
-var _state := eState.STANDBY
 var _request_move = false # 移動要求.
 
 # ---------------------------------------
@@ -77,8 +71,10 @@ func proc(delta: float) -> void:
 		eState.STANDBY:
 			_update_standby(delta)
 		eState.MOVING:
-			_update_moving(delta)
-
+			update_moving(delta)
+		eState.CONVEYOR_BELT:
+			update_conveyor_belt(delta)
+			
 # ---------------------------------------
 # private functions.
 # ---------------------------------------
@@ -92,15 +88,6 @@ func _update_standby(delta:float) -> void:
 		_timer = 0
 		_state = eState.MOVING
 
-func _update_moving(delta:float) -> void:
-	_timer = update_move(_timer, delta)
-	if _timer >= 1:
-		set_pos(_next_pos.x, _next_pos.y, false)
-		_state = eState.STANDBY
-	else:
-		set_pos(_point.x, _point.y, false)		
-	
-	
 ## 種別に対応するスプライトフレーム番号を取得する
 func _get_anim_idx() -> int:
 	match _type:

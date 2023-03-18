@@ -12,6 +12,12 @@ class_name GridObject
 # ---------------------------------------
 # consts.
 # --------------------------------------
+enum eState {
+	STANDBY,
+	MOVING,
+	CONVEYOR_BELT,
+}
+
 enum eMove {
 	DEFALUT,
 	LINEAR,
@@ -24,6 +30,8 @@ var _point = Vector2.ZERO
 var _dir:int = Direction.eType.DOWN
 var _prev_pos = Vector2i.ZERO
 var _next_pos = Vector2i.ZERO
+var _state := eState.STANDBY
+var _timer = 0.0
 
 # ---------------------------------------
 # public functions.
@@ -58,6 +66,35 @@ func idx_x() -> int:
 func idx_y() -> int:
 	return _point.y
 
+
+## 更新 > 移動中.
+func update_moving(delta:float) -> void:
+	_timer = update_move(_timer, delta)
+	if _timer >= 1:
+		set_pos(_next_pos.x, _next_pos.y, false)
+		if check_conveyor_belt():
+			# ベルトコンベアを踏んだ.
+			_timer = 0
+			_state = eState.CONVEYOR_BELT
+		else:
+			_state = eState.STANDBY
+	else:
+		set_pos(_point.x, _point.y, false)		
+
+## 更新 > ベルトコンベア.
+func update_conveyor_belt(delta:float) -> void:
+	_timer = update_move(_timer, delta, eMove.LINEAR)
+	if _timer >= 1:
+		set_pos(_next_pos.x, _next_pos.y, false)
+		if check_conveyor_belt():
+			# ベルトコンベアを踏んだ.
+			_timer = 0
+			_state = eState.CONVEYOR_BELT
+		else:
+			_state = eState.STANDBY
+	else:
+		set_pos(_point.x, _point.y, false)		
+
 ## 共通移動処理.
 func update_move(t:float, delta:float, type:eMove=eMove.DEFALUT) -> float:
 	match type:
@@ -69,3 +106,18 @@ func update_move(t:float, delta:float, type:eMove=eMove.DEFALUT) -> float:
 			_point = lerp(Vector2(_prev_pos), Vector2(_next_pos), Ease.cube_out(t))
 	
 	return t
+
+## ベルトコンベアを踏んだかどうかチェックする
+func check_conveyor_belt() -> bool:
+	var v = Field.get_cell(_point.x, _point.y)
+	if Field.is_conveyor_belt(v) == false:
+		return false # ベルトコンベアでない.
+	
+	var dir = Field.conveyor_belt_to_dir(v)
+	var next = _point + Direction.to_vector(dir)
+	if Field.can_move(next.x, next.y) == false:
+		return false # 移動できない場合はベルトコンベア無効.
+	
+	_prev_pos = _point
+	_next_pos = next
+	return true

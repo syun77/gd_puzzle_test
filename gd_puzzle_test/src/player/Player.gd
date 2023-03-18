@@ -8,11 +8,6 @@ class_name Player
 # ---------------------------------------
 # consts.
 # ---------------------------------------
-enum eState {
-	STANDBY,
-	MOVING,
-	CONVEYOR_BELT,
-}
 
 # ---------------------------------------
 # preload.
@@ -27,8 +22,6 @@ const EFFECT_LOCK_OBJ = preload("res://src/effect/EffectLock.tscn")
 # ---------------------------------------
 # vars.
 # ---------------------------------------
-var _state := eState.STANDBY
-var _timer = 0.0
 var _anim_timer = 0
 var _key:Key = null
 
@@ -42,29 +35,15 @@ func proc(delta:float) -> void:
 		eState.STANDBY:
 			_update_standby(delta)
 		eState.MOVING:
-			_update_moving(delta)
+			update_moving(delta)
 		eState.CONVEYOR_BELT:
-			_update_conveyor_belt(delta)
+			update_conveyor_belt(delta)
 		
 	_spr.frame = _get_anim_id(int(_anim_timer*4)%2)
 	
 	# カギ持っている場合の更新.
 	_update_key()
-	
-## ベルトコンベアを踏んだかどうかチェックする
-func check_conveyor_belt() -> bool:
-	var v = Field.get_cell(_point.x, _point.y)
-	if Field.is_conveyor_belt(v) == false:
-		return false # ベルトコンベアでない.
-	
-	var dir = Field.conveyor_belt_to_dir(v)
-	var next = _point + Direction.to_vector(dir)
-	if Field.can_move(next.x, next.y) == false:
-		return false # 移動できない場合はベルトコンベア無効.
-	
-	_prev_pos = _point
-	_next_pos = next
-	return true
+
 	
 # ---------------------------------------
 # private functions.
@@ -103,33 +82,6 @@ func _update_standby(delta:float) -> void:
 			# 鍵を持っていたら地面に置く.
 			_put_key()
 
-## 更新 > 移動中.
-func _update_moving(delta:float) -> void:
-	_timer = update_move(_timer, delta)
-	if _timer >= 1:
-		set_pos(_next_pos.x, _next_pos.y, false)
-		if check_conveyor_belt():
-			# ベルトコンベアを踏んだ.
-			_timer = 0
-			_state = eState.CONVEYOR_BELT
-		else:
-			_state = eState.STANDBY
-	else:
-		set_pos(_point.x, _point.y, false)		
-
-## 更新 > ベルトコンベア.
-func _update_conveyor_belt(delta:float) -> void:
-	_timer = update_move(_timer, delta, eMove.LINEAR)
-	if _timer >= 1:
-		set_pos(_next_pos.x, _next_pos.y, false)
-		if check_conveyor_belt():
-			# ベルトコンベアを踏んだ.
-			_timer = 0
-			_state = eState.CONVEYOR_BELT
-		else:
-			_state = eState.STANDBY
-	else:
-		set_pos(_point.x, _point.y, false)		
 
 ## カギを持っているときの更新
 func _update_key() -> void:
@@ -145,6 +97,7 @@ func _update_key() -> void:
 	pos += Direction.to_vector(_dir) * 0.5
 	_key.set_pos(pos.x, pos.y, false)
 
+## カギを使うチェック
 func _check_use_key() -> bool:
 	var forward = forward_pos()
 	var v = Field.get_cell(forward.x, forward.y)
@@ -166,6 +119,7 @@ func _put_key() -> void:
 	var pos = forward_pos()
 	if Field.can_move(pos.x, pos.y):
 		# 移動可能なので置ける.
+		_key.carried = false
 		_key.set_pos(pos.x, pos.y, false)
 		_key = null
 
@@ -223,3 +177,4 @@ func _on_area_entered(area):
 	if area is Key:
 		# カギGet.
 		_key = area
+		_key.carried = true # 運んでいる.
