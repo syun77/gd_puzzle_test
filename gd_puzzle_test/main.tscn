@@ -34,7 +34,8 @@ theme_override_font_sizes/font_size = 80
 text = "GAME OVER"
 horizontal_alignment = 1
 vertical_alignment = 1
-visible_ratio = -0.111111
+visible_characters = 0
+visible_ratio = 0.0
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(576, 320)

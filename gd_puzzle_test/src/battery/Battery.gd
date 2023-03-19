@@ -64,6 +64,8 @@ func proc(delta: float) -> void:
 	var ofs = (int(_anim_timer*4)%anim_tbl.size())
 	_spr.frame = idx + (4 * anim_tbl[ofs])
 	
+	queue_redraw()
+	
 # ---------------------------------------
 # private functions.
 # ---------------------------------------
@@ -85,3 +87,27 @@ func _get_anim_idx() -> int:
 			return 2
 		_: # Direction.eType.RIGHT:
 			return 3
+
+func _draw() -> void:
+	var dir = Direction.to_vector(_dir)
+	var pos = _point + dir
+	while Field.is_outside(pos.x, pos.y) == false:
+		if Field.can_move(pos.x, pos.y) == false:
+			break
+		pos += dir
+	
+	var p1 = Field.idx_to_world(_point + dir)
+	var p2 = Field.idx_to_world(pos + (dir * 0.2))
+	var color = Color.RED
+	color.a = 0.8
+	var rect = Rect2(p1-position, p2-p1)
+	var size = (Field.TILE_SIZE * 0.5) * randf_range(0.7, 1)
+	if rect.size.x == 0:
+		# 上下.
+		rect.size.x = size
+		rect.position.x += (Field.TILE_SIZE/2) - (size/2)
+	if rect.size.y == 0:
+		# 左右.
+		rect.size.y = size
+		rect.position.y += (Field.TILE_SIZE/2) - (size/2)
+	draw_rect(rect, color)

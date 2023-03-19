@@ -96,6 +96,9 @@ func forward_pos() -> Vector2:
 
 ## 指定の座標と一致しているかどうか.
 func is_same_pos(i:int, j:int) -> bool:
+	if is_moving(_state):
+		# 移動中の場合は移動後で判定する.
+		return _next_pos.x == i and _next_pos.y == j
 	return _point.x == i and _point.y == j
 
 ## グリッド座標系のXを取得する.

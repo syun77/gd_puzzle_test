@@ -160,7 +160,7 @@ func _check_move() -> bool:
 	
 	var can_move = false
 	
-	if Field.is_crate(next.x, next.y):
+	if Field.exists_crate(next.x, next.y):
 		# 移動先が荷物.
 		if Field.can_move_crate(next.x, next.y, d.x, d.y):
 			# 移動できる.

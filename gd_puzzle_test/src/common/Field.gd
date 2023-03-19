@@ -185,6 +185,14 @@ var _tile:TileMap = null
 func setup(tile:TileMap) -> void:
 	_tile = tile
 
+## フィールドの場外かどうか.
+func is_outside(i:int, j:int) -> bool:
+	if i < 0 or j < 0:
+		return true
+	if i >= TILE_WIDTH or j >= TILE_HEIGHT:
+		return true
+	return false
+
 func get_cell(i:int, j:int) -> int:
 	var data = _tile.get_cell_tile_data(eTileLayer.BACKGROUND, Vector2i(i, j))
 	if data == null:
@@ -255,16 +263,33 @@ func toggle_pit(i:int, j:int) -> void:
 
 ## 移動可能な位置かどうか.
 func can_move(i:int, j:int) -> bool:
-	match get_cell(i, j):
-		eTile.BLOCK, eTile.LOCK:
-			return false # 壁がある.
-		_:
-			if is_crate(i, j):
-				return false # 荷物がある.
-			return true
+	var v = get_cell(i, j)
+	if v in [eTile.BLOCK, eTile.LOCK]:
+		return false # 壁がある.
+	
+	if exists_crate(i, j):
+		return false # 荷物がある.
+	
+	if exists_battery(i, j):
+		return false # 砲がある.
+	
+	return true
 
+## 砲台があるかどうか.
+func exists_battery(i:int, j:int) -> bool:
+	if search_battery(i, j) != null:
+		return true
+	return false
+func search_battery(i:int, j:int) -> Battery:
+	for obj in Common.get_layer("obj").get_children():
+		if not obj is Battery:
+			continue # 砲台でない.
+		if obj.is_same_pos(i, j):
+			return obj # 存在する.
+	
+	return null # 存在しない.
 ## 荷物があるかどうか.
-func is_crate(i:int, j:int) -> bool:
+func exists_crate(i:int, j:int) -> bool:
 	if search_crate(i, j) != null:
 		return true
 	return false
@@ -285,7 +310,7 @@ func can_move_crate(i:int, j:int, dx:int, dy:int) -> bool:
 	if can_move(i+dx, j+dy) == false:
 		return false # 動かせない.
 	
-	if is_crate(i, j) == false:
+	if exists_crate(i, j) == false:
 		return false # 指定した位置に荷物がない.
 	
 	return true # 動かせる.
@@ -310,7 +335,7 @@ func idx_to_world_y(j:float, is_center:bool=false) -> float:
 		j2 += 0.5	
 	return FIELD_OFS_Y + (j2 * TILE_SIZE)
 ## インデックス座標系をワールド座標系に変換する.
-func idx_to_world(p:Vector2i, is_center:bool=false) -> Vector2:
+func idx_to_world(p:Vector2, is_center:bool=false) -> Vector2:
 	var v = Vector2()
 	v.x = idx_to_world_x(p.x, is_center)
 	v.y = idx_to_world_y(p.y, is_center)
