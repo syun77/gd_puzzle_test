@@ -94,6 +94,11 @@ func _draw() -> void:
 	while Field.is_outside(pos.x, pos.y) == false:
 		if Field.can_move(pos.x, pos.y) == false:
 			break
+		
+		# レーザーマップを設定する.
+		Field.biton_laser_map(pos.x, pos.y)
+		
+		# 次の位置を調べる.
 		pos += dir
 	
 	var p1 = Field.idx_to_world(_point + dir)

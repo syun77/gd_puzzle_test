@@ -78,6 +78,11 @@ func _ready() -> void:
 ## 更新 > 停止中.
 func _update_standby(delta:float) -> void:
 	
+	if Field.bitchk_laser_map(_point.x, _point.y):
+		# 死亡処理へ.
+		request_kill = true
+		return
+	
 	# キーの入力判定.
 	var is_moving = false
 	if Input.is_action_pressed("ui_left"):
@@ -136,7 +141,6 @@ func _check_use_key() -> bool:
 		return true
 	# 使わない.
 	return false
-
 
 ## カギを置く.
 func _put_key() -> void:

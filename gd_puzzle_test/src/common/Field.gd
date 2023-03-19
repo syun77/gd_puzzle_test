@@ -177,6 +177,7 @@ func is_pit(tile:eTile) -> bool:
 # vars.
 # ---------------------------------------
 var _tile:TileMap = null
+var _laser_map = Common.Array2.new(TILE_WIDTH, TILE_HEIGHT)
 
 # ---------------------------------------
 # public functions.
@@ -358,6 +359,16 @@ func search_random_none() -> Vector2i:
 	
 	arr.shuffle()
 	return arr[0]
+
+## レーザーヒットマップを消去.
+func clear_laser_map() -> void:
+	_laser_map.clear()
+## レーザーヒットマップのフラグを立てる.
+func biton_laser_map(i:int, j:int) -> void:
+	_laser_map.setv(i, j, 1)
+## 指定の位置にフラが立っているかどうかを調べる.
+func bitchk_laser_map(i:int, j:int) -> bool:
+	return _laser_map.getv(i, j) != 0
 
 # ---------------------------------------
 # private functions.

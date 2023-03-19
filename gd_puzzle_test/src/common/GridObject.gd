@@ -172,16 +172,24 @@ func pre_update() -> void:
 ## 後処理.
 func post_update() -> void:
 	# 移動後処理.
-	if is_change():
-		if is_stomp_pit():
-			# ピットを踏んだ.
-			if has_method("cb_stomp_pit"):
-				call("cb_stomp_pit")
-		var v = Field.get_cell(_point.x, _point.y)
-		if Field.switch_check(_point.x, _point.y) == false:
-			Field.switch_on(_point.x, _point.y)
-		if is_moving(_state_obj.prev):
-			Field.switch_off(_prev_pos.x, _prev_pos.y)
+	if is_change() == false:
+		return # eStateの変化なし.
+		
+	if is_stomp_pit():
+		# ピットを踏んだ.
+		if has_method("cb_stomp_pit"):
+			call("cb_stomp_pit")
+	
+	# スイッチの処理.
+	var px = _point.x
+	var py = _point.y
+	var v = Field.get_cell(px, py)
+	if Field.switch_check(px, py) == false:
+		# ONにする
+		Field.switch_on(px, py)
+	if is_moving(_state_obj.prev):
+		# 移動処理完了.
+		Field.switch_off(_prev_pos.x, _prev_pos.y)
 
 ## ピットを踏んだかどうか.
 func is_stomp_pit() -> bool:

@@ -102,7 +102,7 @@ func _create_obj(i:int, j:int, id:int) -> bool:
 			return true
 		Field.eTile.KEY:
 			# カギ.
-			_create_keY(i, j)
+			_create_key(i, j)
 			return true
 		Field.eTile.SPIKE:
 			# トゲ.
@@ -130,7 +130,7 @@ func _create_crate(i:int, j:int, id:int) -> void:
 	crate.setup(i, j, id)
 	
 ## カギの生成.
-func _create_keY(i:int, j:int) -> void:
+func _create_key(i:int, j:int) -> void:
 	var key = KEY_OBJ.instantiate()
 	_obj_layer.add_child(key)
 	key.setup(i, j)
@@ -175,6 +175,9 @@ func _update_main(delta:float) -> void:
 	
 	# プレイヤーの更新.
 	_player.proc(delta)
+	
+	# レーザーマップの初期化.
+	Field.clear_laser_map()
 	
 	# オブジェクトの更新.
 	for obj in _obj_layer.get_children():
