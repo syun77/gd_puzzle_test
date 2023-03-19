@@ -183,7 +183,7 @@ func post_update() -> void:
 ## ピットを踏んだかどうか.
 func is_stomp_pit() -> bool:
 	var v = Field.get_cell(_point.x, _point.y)
-	if v == Field.eTile.PIT_ON:
+	if v in [Field.eTile.PIT_ON, Field.eTile.PIT2_ON]:
 		return true # ピットを踏んだ.
 	return false
 

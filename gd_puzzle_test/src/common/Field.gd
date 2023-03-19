@@ -81,6 +81,9 @@ enum eTile {
 	START = 100, # 開始地点
 }
 
+# ピットを切り替えるスイッチ.
+const SWITCH_PIT_TBL = [eTile.SWITCH_OFF, eTile.SWITCH_ON]
+
 ## Atlas coords.
 const ATLAS_COORDS_BLANK = Vector2i(1, 0)
 const ATLAS_COORDS_PIT_OFF = Vector2i(3, 1)
@@ -139,6 +142,7 @@ func conveyor_belt_to_dir(tile:eTile) -> Direction.eType:
 		eTile.CONVEYOR_BELT_D: Direction.eType.DOWN, # 下.
 	}
 	return tbl[tile]
+
 ## スイッチかどうか.
 func is_switch(tile:eTile) -> bool:
 	var tbl = [
@@ -156,6 +160,11 @@ func is_switch(tile:eTile) -> bool:
 		eTile.SWITCH_OFF, # 無効.
 		eTile.SWITCH_ON, # 有効.
 	]
+	return tile in tbl
+
+## ピットかどうか.
+func is_pit(tile:eTile) -> bool:
+	var tbl = [eTile.PIT_OFF, eTile.PIT_ON, eTile.PIT2_OFF, eTile.PIT2_ON]
 	return tile in tbl
 
 # ---------------------------------------
@@ -219,6 +228,23 @@ func toggle_switch(i:int, j:int) -> void:
 	else:
 		v -= 1 # ON -> OFF
 	
+	if v in SWITCH_PIT_TBL:
+		# ピットの状態を切り替え.
+		for y in range(TILE_HEIGHT):
+			for x in range(TILE_WIDTH):
+				toggle_pit(x, y)
+	
+	set_cell(i, j, v)
+
+## ピットの状態をトグルする.
+func toggle_pit(i:int, j:int) -> void:
+	var v = get_cell(i, j)
+	if is_pit(v) == false:
+		return # ピットでない.
+	if v%2 == 0:
+		v += 1 # OFF -> ON
+	else:
+		v -= 1 # ON -> OFF
 	set_cell(i, j, v)
 
 ## 移動可能な位置かどうか.
