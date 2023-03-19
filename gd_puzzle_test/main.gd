@@ -43,6 +43,7 @@ var _timer = 0.0 # タイマー.
 var _state = eState.MAIN # 状態.
 var _player:Player = null
 var _timer_shake = 0.0
+var _goal_pos = Vector2i.ONE * -1 # ゴールの位置.
 
 # ---------------------------------------
 # private functions.
@@ -79,6 +80,9 @@ func _ready() -> void:
 		push_warning("プレイヤーの開始位置が設定されていません.")
 		var p = Field.search_random_none()
 		_create_player(p.x, p.y)
+	
+	# ゴールの位置を探す.
+	_goal_pos = Field.search_goal()
 	
 	# 共通モジュールをセットアップする.
 	var layers = {
@@ -153,7 +157,7 @@ func _process(delta:float) -> void:
 		eState.MAIN:
 			_update_main(delta)
 		eState.STAGE_CLEAR:
-			_update_stage_clear()
+			_update_stage_clear(delta)
 		eState.WAIT:
 			_update_wait(delta)
 		eState.GAME_OVER:
@@ -182,11 +186,7 @@ func _update_main(delta:float) -> void:
 	Field.clear_block_map()
 	
 	# オブジェクトの更新.
-	for obj in _obj_layer.get_children():
-		if obj is Player:
-			continue # プレイヤは除外.
-		if obj.has_method("proc"):
-			obj.proc(delta)
+	_update_objects(delta)
 	
 	# 荷物の更新.
 	for crate in _crate_layer.get_children():
@@ -194,14 +194,36 @@ func _update_main(delta:float) -> void:
 	
 	# UIの更新.
 	#_update_ui(delta)
+	
+	# ゴール判定.
+	if _player.is_standby():
+		if _player.is_same_pos(_goal_pos.x, _goal_pos.y):
+			_timer = 0
+			_state = eState.STAGE_CLEAR
+
+## オブジェクトの更新 (プレイヤーは除外).
+func _update_objects(delta:float) -> void:
+	for obj in _obj_layer.get_children():
+		if obj is Player:
+			continue # プレイヤは除外.
+		if obj.has_method("proc"):
+			obj.proc(delta)
 
 ## 更新 > ステージクリア.
-func _update_stage_clear() -> void:
+func _update_stage_clear(delta:float) -> void:
+	_timer += delta
+	# オブジェクトの更新.
+	_update_objects(delta)
+	
 	# キャプションを表示する.
-	#_ui_caption.visible = true
-	#_ui_caption.text = "COMPLETED"
+	_ui_caption.visible = true
+	_ui_caption.text = "COMPLETED"
+	_ui_caption.visible_ratio = 1
+	if _timer < 1:
+		return # 演出中.
+		
 	if Common.is_final_level():
-		#_ui_caption.text = "ALL LEVELS COMPLETED!"
+		_ui_caption.text = "ALL LEVELS COMPLETED!"
 		pass
 	
 	if Input.is_action_just_pressed("ui_accept"):
@@ -220,6 +242,8 @@ func _update_wait(delta:float) -> void:
 		_start_gameover()
 
 func _update_gameover(delta:float) -> void:
+	# オブジェクトの更新.
+	_update_objects(delta)
 	_ui_caption.visible_ratio += delta
 	
 	if _timer_shake > 0:

@@ -85,6 +85,9 @@ enum eTile {
 	BATTERY_UP = 201, # 上.
 	BATTERY_RIGHT = 202, # 右.
 	BATTERY_DOWN = 203, # 下.
+	
+	# ゴール.
+	GOAL = 500,
 }
 
 # ピットを切り替えるスイッチ.
@@ -360,6 +363,16 @@ func search_random_none() -> Vector2i:
 	
 	arr.shuffle()
 	return arr[0]
+
+## ゴールの位置を探す.
+func search_goal() -> Vector2i:
+	for j in range(TILE_HEIGHT):
+		for i in range(TILE_WIDTH):
+			var v = get_cell(i, j)
+			if v == eTile.GOAL:
+				return Vector2i(i, j)
+	
+	return Vector2i.ONE * -1 # 見つからなかった.
 
 ## レーザーヒットマップを消去.
 func clear_laser_map() -> void:

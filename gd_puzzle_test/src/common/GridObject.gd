@@ -198,6 +198,9 @@ func is_stomp_pit() -> bool:
 		return true # ピットを踏んだ.
 	return false
 
+func is_standby() -> bool:
+	return _state == eState.STANDBY
+	
 ## stateの更新.
 func update_state() -> void:
 	_state_obj.update()
