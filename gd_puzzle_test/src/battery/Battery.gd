@@ -93,7 +93,9 @@ func _draw() -> void:
 	var pos = _point + dir
 	while Field.is_outside(pos.x, pos.y) == false:
 		if Field.can_move(pos.x, pos.y) == false:
-			break
+			break # 壁があるので終了
+		if Field.bitchk_block_map(pos.x, pos.y):
+			break # 壁があるので終了
 		
 		# レーザーマップを設定する.
 		Field.biton_laser_map(pos.x, pos.y)

@@ -178,6 +178,8 @@ func _update_main(delta:float) -> void:
 	
 	# レーザーマップの初期化.
 	Field.clear_laser_map()
+	# ブロックマップの初期化.
+	Field.clear_block_map()
 	
 	# オブジェクトの更新.
 	for obj in _obj_layer.get_children():

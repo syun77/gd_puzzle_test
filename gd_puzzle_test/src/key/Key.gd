@@ -29,7 +29,10 @@ func proc(delta: float) -> void:
 ## 更新 > 待機.
 func _update_standby(delta:float) -> void:
 	if carried:
-		return # 運ばれているときはベルトコンベで動かない.
+		return # 運ばれているときはベルトコンベアで動かない.
+	
+	# 置かれている場合はレーザーの壁扱いとなる.
+	Field.biton_block_map(_point.x, _point.y)
 	
 	if check_conveyor_belt():
 		_timer = 0
