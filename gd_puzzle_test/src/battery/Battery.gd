@@ -101,7 +101,16 @@ func _draw() -> void:
 		# 次の位置を調べる.
 		pos += dir
 	
-	var p1 = Field.idx_to_world(_point + dir)
+	# 開始座標.
+	var start = _point
+	if _dir in [Direction.eType.RIGHT, Direction.eType.DOWN]:
+		# 右 or 下は1つ先から表示.
+		start += dir
+	else:
+		# 左 or 上は1つ前で終了.
+		pos -= dir
+	
+	var p1 = Field.idx_to_world(start)
 	var p2 = Field.idx_to_world(pos + (dir * 0.2))
 	var color = Color.RED
 	color.a = 0.8
