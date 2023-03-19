@@ -16,4 +16,4 @@ layer_1/modulate = Color(1, 1, 1, 1)
 layer_1/y_sort_enabled = false
 layer_1/y_sort_origin = 0
 layer_1/z_index = 0
-layer_1/tile_data = PackedInt32Array(131074, 0, 3, 327684, 131072, 1, 196616, 131072, 2, 196611, 0, 1)
+layer_1/tile_data = PackedInt32Array(131074, 0, 3, 327684, 131072, 1, 196616, 131072, 2, 196611, 0, 1, 393230, 65536, 4)

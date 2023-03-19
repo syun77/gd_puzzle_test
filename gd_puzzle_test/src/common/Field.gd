@@ -79,6 +79,12 @@ enum eTile {
 
 	# プレイヤー
 	START = 100, # 開始地点
+	
+	# 砲台.
+	BATTERY_LEFT = 200, # 左.
+	BATTERY_UP = 201, # 上.
+	BATTERY_RIGHT = 202, # 右.
+	BATTERY_DOWN = 203, # 下.
 }
 
 # ピットを切り替えるスイッチ.

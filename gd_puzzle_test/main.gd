@@ -14,6 +14,7 @@ const PLAYER_OBJ = preload("res://src/player/Player.tscn")
 const CRATE_OBJ = preload("res://src/crate/Crate.tscn")
 const KEY_OBJ = preload("res://src/key/Key.tscn")
 const SPIKE_OBJ = preload("res://src/spike/Spike.tscn")
+const BATTERY_OBJ = preload("res://src/battery/Battery.tscn")
 
 enum eState {
 	MAIN, # メイン.
@@ -107,6 +108,10 @@ func _create_obj(i:int, j:int, id:int) -> bool:
 			# トゲ.
 			_create_spike(i, j)
 			return true
+		Field.eTile.BATTERY_LEFT, Field.eTile.BATTERY_UP, Field.eTile.BATTERY_RIGHT, Field.eTile.BATTERY_DOWN:
+			# 砲台.
+			_create_battery(i, j, id)
+			return true
 	
 	# 生成されていない.
 	return false
@@ -135,6 +140,12 @@ func _create_spike(i:int, j:int) -> void:
 	var spike = SPIKE_OBJ.instantiate()
 	_obj_layer.add_child(spike)
 	spike.setup(i, j)
+
+## 砲台の生成.
+func _create_battery(i:int, j:int, id:Field.eTile) -> void:
+	var battery = BATTERY_OBJ.instantiate()
+	_obj_layer.add_child(battery)
+	battery.setup(i, j, id)
 
 ## 更新.
 func _process(delta:float) -> void:
