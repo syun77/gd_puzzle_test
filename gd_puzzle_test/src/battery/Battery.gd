@@ -24,6 +24,8 @@ class_name Battery
 # vars.
 # ---------------------------------------
 var _anim_timer = 0.0
+var _particle_pos = Vector2.ZERO
+var _cnt = 0
 
 # ---------------------------------------
 # public functions.
@@ -52,6 +54,7 @@ func can_move() -> bool:
 
 ## 更新
 func proc(delta: float) -> void:
+	_cnt += 1
 	_anim_timer += delta
 	
 	update_state()
@@ -63,6 +66,10 @@ func proc(delta: float) -> void:
 	var anim_tbl = [0, 1, 2, 1]
 	var ofs = (int(_anim_timer*4)%anim_tbl.size())
 	_spr.frame = idx + (4 * anim_tbl[ofs])
+	
+	if _cnt%4 == 0:
+		var dir = Direction.to_vector(_dir)
+		_add_particle(_particle_pos, dir)
 	
 	queue_redraw()
 	
@@ -104,7 +111,7 @@ func _draw() -> void:
 		pos += dir
 	
 	# 開始座標.
-	var start = _point
+	var start = _point - (dir*0.2)
 	if _dir in [Direction.eType.RIGHT, Direction.eType.DOWN]:
 		# 右 or 下は1つ先から表示.
 		start += dir
@@ -113,17 +120,37 @@ func _draw() -> void:
 		pos -= dir
 	
 	var p1 = Field.idx_to_world(start)
-	var p2 = Field.idx_to_world(pos + (dir * 0.2))
+	var p2 = Field.idx_to_world(pos)
+	
 	var color = Color.RED
 	color.a = 0.8
 	var rect = Rect2(p1-position, p2-p1)
 	var size = (Field.TILE_SIZE * 0.5) * randf_range(0.7, 1)
+	var particle_pos = p1
 	if rect.size.x == 0:
 		# 上下.
 		rect.size.x = size
 		rect.position.x += (Field.TILE_SIZE/2) - (size/2)
+		particle_pos.x += Field.TILE_SIZE/2
+		particle_pos.y += rect.size.y
 	if rect.size.y == 0:
 		# 左右.
 		rect.size.y = size
 		rect.position.y += (Field.TILE_SIZE/2) - (size/2)
+		particle_pos.x += rect.size.x
+		particle_pos.y += Field.TILE_SIZE/2
 	draw_rect(rect, color)
+	
+	_particle_pos = particle_pos
+
+func _add_particle(pos:Vector2, dir:Vector2) -> void:
+	var p:Particle = Common.add_particle()
+	var t = 0.5
+	var deg = rad_to_deg(atan2(dir.y, -dir.x))
+	deg += randf_range(-60, 60)
+	var speed = randf_range(100, 300)
+	p.position = pos
+	var ax = 0
+	var ay = 0
+	p.start(t, deg, speed, ax, ay, Color.RED, 1.5)
+	
