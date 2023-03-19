@@ -43,6 +43,10 @@ enum eTile {
 	CONVEYOR_BELT_R = 5, # 右.
 	CONVEYOR_BELT_D = 6, # 下.
 	
+	# ピット
+	PIT_OFF = 7, # 無効.
+	PIT_ON = 8, # 有効.
+	
 	# 荷物
 	CRATE1 = 10,
 	CRATE2 = 11,

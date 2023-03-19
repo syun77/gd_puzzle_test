@@ -4,10 +4,7 @@ extends Area2D
 # グリッド(インデックス)座標系で動作するオブジェクトの既定.
 # ===========================
 class_name GridObject
-
-# ---------------------------------------
-# preload.
-# ---------------------------------------
+	
 
 # ---------------------------------------
 # consts.
@@ -24,14 +21,51 @@ enum eMove {
 }
 
 # ---------------------------------------
+# class.
+# ---------------------------------------
+class StateObject:
+	var now:eState
+	var prev:eState
+	var next:eState
+	var changed:bool = false
+	var cnt:int = 0
+	func _init() -> void:
+		now = eState.STANDBY
+		prev = now
+		next = now
+		cnt = 0
+		changed = false
+	func change(v:eState) -> void:
+		next = v
+		changed = true
+	func is_first() -> bool:
+		return cnt == 0
+	func update() -> void:
+		if changed:
+			prev = now
+			now = next
+			cnt = 0
+			changed = false
+		else:
+			cnt += 1
+
+# ---------------------------------------
 # vars.
 # ---------------------------------------
 var _point = Vector2.ZERO
 var _dir:int = Direction.eType.DOWN
 var _prev_pos = Vector2i.ZERO
 var _next_pos = Vector2i.ZERO
-var _state := eState.STANDBY
 var _timer = 0.0
+var _state_obj = StateObject.new()
+
+
+## 状態
+var _state := eState.STANDBY:
+	set(v):
+		_state_obj.change(v)
+	get:
+		return _state_obj.now
 
 # ---------------------------------------
 # public functions.
@@ -79,7 +113,7 @@ func update_moving(delta:float) -> void:
 		else:
 			_state = eState.STANDBY
 	else:
-		set_pos(_point.x, _point.y, false)		
+		set_pos(_point.x, _point.y, false)
 
 ## 更新 > ベルトコンベア.
 func update_conveyor_belt(delta:float) -> void:
@@ -89,11 +123,11 @@ func update_conveyor_belt(delta:float) -> void:
 		if check_conveyor_belt():
 			# ベルトコンベアを踏んだ.
 			_timer = 0
-			_state = eState.CONVEYOR_BELT
+			change_state(eState.CONVEYOR_BELT)
 		else:
 			_state = eState.STANDBY
 	else:
-		set_pos(_point.x, _point.y, false)		
+		set_pos(_point.x, _point.y, false)
 
 ## 共通移動処理.
 func update_move(t:float, delta:float, type:eMove=eMove.DEFALUT) -> float:
@@ -121,3 +155,34 @@ func check_conveyor_belt() -> bool:
 	_prev_pos = _point
 	_next_pos = next
 	return true
+
+## 前処理.
+func pre_update() -> void:
+	pass
+	
+## 後処理.
+func post_update() -> void:
+	# 移動後処理.
+	if is_change():
+		if is_stomp_pit():
+			# ピットを踏んだ.
+			if has_method("cb_stomp_pit"):
+				call("cb_stomp_pit")
+
+## ピットを踏んだかどうか.
+func is_stomp_pit() -> bool:
+	var v = Field.get_cell(_point.x, _point.y)
+	if v == Field.eTile.PIT_ON:
+		return true # ピットを踏んだ.
+	return false
+
+## stateの更新.
+func update_state() -> void:
+	_state_obj.update()
+func is_first() -> bool:
+	return _state_obj.is_first()
+func is_change() -> bool:
+	return _state_obj.changed
+func change_state(v:eState) -> void:
+	_state = v
+	_state_obj.change(v)

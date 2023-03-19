@@ -37,6 +37,8 @@ func vanish() -> void:
 	queue_free()
 
 func proc(delta:float) -> void:
+	
+	# 死亡処理.
 	if request_kill:
 		modulate = Color.RED
 		_timer2 += delta
@@ -50,6 +52,8 @@ func proc(delta:float) -> void:
 	
 	_anim_timer += delta
 
+	update_state()
+	pre_update()
 	match _state:
 		eState.STANDBY:
 			_update_standby(delta)
@@ -57,6 +61,7 @@ func proc(delta:float) -> void:
 			update_moving(delta)
 		eState.CONVEYOR_BELT:
 			update_conveyor_belt(delta)
+	post_update()
 		
 	_spr.frame = _get_anim_id(int(_anim_timer*4)%2)
 	
@@ -198,6 +203,13 @@ var request_kill:bool = false:
 		request_kill = b
 	get:
 		return request_kill
+
+# ---------------------------------------
+# callback functions.
+# ---------------------------------------
+## ピットを踏んだ.
+func cb_stomp_pit() -> void:
+	request_kill = true
 
 # ---------------------------------------
 # signal functions.

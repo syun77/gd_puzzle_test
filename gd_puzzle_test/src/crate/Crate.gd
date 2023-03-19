@@ -67,6 +67,9 @@ func request_move(i:int, j:int) -> bool:
 
 ## 更新
 func proc(delta: float) -> void:
+	
+	update_state()
+	pre_update()
 	match _state:
 		eState.STANDBY:
 			_update_standby(delta)
@@ -74,7 +77,8 @@ func proc(delta: float) -> void:
 			update_moving(delta)
 		eState.CONVEYOR_BELT:
 			update_conveyor_belt(delta)
-			
+	post_update()
+	
 # ---------------------------------------
 # private functions.
 # ---------------------------------------

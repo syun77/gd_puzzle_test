@@ -15,6 +15,7 @@ func vanish() -> void:
 	
 ## 更新
 func proc(delta: float) -> void:
+	update_state()
 	match _state:
 		eState.STANDBY:
 			_update_standby(delta)
