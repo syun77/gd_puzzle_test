@@ -15,6 +15,7 @@ func vanish() -> void:
 	
 ## 更新
 func proc(delta: float) -> void:
+	pre_update()
 	update_state()
 	match _state:
 		eState.STANDBY:
@@ -23,6 +24,7 @@ func proc(delta: float) -> void:
 			update_moving(delta)
 		eState.CONVEYOR_BELT:
 			update_conveyor_belt(delta)
+	post_update()
 
 ## 更新 > 待機.
 func _update_standby(delta:float) -> void:

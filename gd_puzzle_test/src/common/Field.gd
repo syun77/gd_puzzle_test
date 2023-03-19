@@ -19,6 +19,8 @@ const TILE_HEIGHT = 10
 
 const CUSTOM_NAME = "Terrain"
 
+const SOURCE_ID = 0
+
 # ---------------------------------------
 # enum.
 # ---------------------------------------
@@ -44,22 +46,80 @@ enum eTile {
 	CONVEYOR_BELT_D = 6, # 下.
 	
 	# ピット
-	PIT_OFF = 7, # 無効.
-	PIT_ON = 8, # 有効.
+	PIT_OFF = 10, # 無効.
+	PIT_ON = 11, # 有効.
+	PIT2_OFF = 12, # 無効.
+	PIT2_ON = 13, # 有効.
+
+	# スイッチ.
+	SWITCH_WHITE_OFF = 20, # 無効.
+	SWITCH_WHITE_ON = 21, # 有効.
+	SWITCH_RED_OFF = 22, # 無効.
+	SWITCH_RED_ON = 23, # 有効.
+	SWITCH_BLUE_OFF = 24, # 無効.
+	SWITCH_BLUE_ON = 25, # 有効.
+	SWITCH_GREEN_OFF = 26, # 無効.
+	SWITCH_GREEN_ON = 27, # 有効.
+	SWITCH_YELLOW_OFF = 28, # 無効.
+	SWITCH_YELLOW_ON = 29, # 有効.
+	SWITCH_OFF = 30, # 無効.
+	SWITCH_ON = 31, # 有効.
 	
 	# 荷物
-	CRATE1 = 10,
-	CRATE2 = 11,
-	CRATE3 = 12,
-	CRATE4 = 13,
+	CRATE1 = 50,
+	CRATE2 = 51,
+	CRATE3 = 52,
+	CRATE4 = 53,
 	
 	# アイテム.
-	KEY = 15,
-	
-	SPIKE = 16,
+	KEY = 54,
+
+	# 障害物.	
+	SPIKE = 55,
 
 	# プレイヤー
-	START = 20, # 開始地点
+	START = 100, # 開始地点
+}
+
+## Atlas coords.
+const ATLAS_COORDS_BLANK = Vector2i(1, 0)
+const ATLAS_COORDS_PIT_OFF = Vector2i(3, 1)
+const ATLAS_COORDS_PIT_ON = Vector2i(4, 1)
+const ATLAS_COORDS_PIT2_OFF = Vector2i(5, 1)
+const ATLAS_COORDS_PIT2_ON = Vector2i(6, 1)
+const ATLAS_COORDS_SWITCH_WHITE_OFF = Vector2i(3, 2)
+const ATLAS_COORDS_SWITCH_WHITE_ON = Vector2i(4, 2)
+const ATLAS_COORDS_SWITCH_RED_OFF = Vector2i(3, 3)
+const ATLAS_COORDS_SWITCH_RED_ON = Vector2i(4, 3)
+const ATLAS_COORDS_SWITCH_BLUE_OFF = Vector2i(3, 4)
+const ATLAS_COORDS_SWITCH_BLUE_ON = Vector2i(4, 4)
+const ATLAS_COORDS_SWITCH_GREEN_OFF = Vector2i(3, 5)
+const ATLAS_COORDS_SWITCH_GREEN_ON = Vector2i(4, 5)
+const ATLAS_COORDS_SWITCH_YELLOW_OFF = Vector2i(3, 6)
+const ATLAS_COORDS_SWITCH_YELLOW_ON = Vector2i(4, 6)
+const ATLAS_COORDS_SWITCH_OFF = Vector2i(3, 7)
+const ATLAS_COORDS_SWITCH_ON = Vector2i(4, 7)
+
+const ATLAS_COORDS_TBL = {
+	eTile.BLANK: ATLAS_COORDS_BLANK,
+	# ピット.
+	eTile.PIT_OFF: ATLAS_COORDS_PIT_OFF,
+	eTile.PIT_ON: ATLAS_COORDS_PIT_ON,
+	eTile.PIT2_OFF: ATLAS_COORDS_PIT2_OFF,
+	eTile.PIT2_ON: ATLAS_COORDS_PIT2_ON,
+	# スイッチ.
+	eTile.SWITCH_WHITE_OFF: ATLAS_COORDS_SWITCH_OFF,
+	eTile.SWITCH_WHITE_ON: ATLAS_COORDS_SWITCH_ON,
+	eTile.SWITCH_RED_OFF: ATLAS_COORDS_SWITCH_OFF,
+	eTile.SWITCH_RED_ON: ATLAS_COORDS_SWITCH_ON,
+	eTile.SWITCH_BLUE_OFF: ATLAS_COORDS_SWITCH_OFF,
+	eTile.SWITCH_BLUE_ON: ATLAS_COORDS_SWITCH_ON,
+	eTile.SWITCH_GREEN_OFF: ATLAS_COORDS_SWITCH_OFF,
+	eTile.SWITCH_GREEN_ON: ATLAS_COORDS_SWITCH_ON,
+	eTile.SWITCH_YELLOW_OFF: ATLAS_COORDS_SWITCH_OFF,
+	eTile.SWITCH_YELLOW_ON: ATLAS_COORDS_SWITCH_ON,
+	eTile.SWITCH_OFF: ATLAS_COORDS_SWITCH_OFF, 
+	eTile.SWITCH_ON: ATLAS_COORDS_SWITCH_ON, 
 }
 
 ## ベルトコンベアかどうか.
@@ -79,6 +139,24 @@ func conveyor_belt_to_dir(tile:eTile) -> Direction.eType:
 		eTile.CONVEYOR_BELT_D: Direction.eType.DOWN, # 下.
 	}
 	return tbl[tile]
+## スイッチかどうか.
+func is_switch(tile:eTile) -> bool:
+	var tbl = [
+		# スイッチ.
+		eTile.SWITCH_WHITE_OFF, # 無効.
+		eTile.SWITCH_WHITE_ON, # 有効.
+		eTile.SWITCH_RED_OFF, # 無効.
+		eTile.SWITCH_RED_ON, # 有効.
+		eTile.SWITCH_BLUE_OFF, # 無効.
+		eTile.SWITCH_BLUE_ON, # 有効.
+		eTile.SWITCH_GREEN_OFF, # 無効.
+		eTile.SWITCH_GREEN_ON, # 有効.
+		eTile.SWITCH_YELLOW_OFF, # 無効.
+		eTile.SWITCH_YELLOW_ON, # 有効.
+		eTile.SWITCH_OFF, # 無効.
+		eTile.SWITCH_ON, # 有効.
+	]
+	return tile in tbl
 
 # ---------------------------------------
 # vars.
@@ -99,10 +177,49 @@ func get_cell(i:int, j:int) -> int:
 	var v:int = data.get_custom_data(CUSTOM_NAME)
 	return v
 
+func set_cell(i:int, j:int, v:eTile) -> void:
+	if not v in ATLAS_COORDS_TBL:
+		assert(0, "不明なタイルID:%d"%v)
+	var atlas_coords = ATLAS_COORDS_TBL[v]
+	_tile.set_cell(eTileLayer.BACKGROUND, Vector2i(i, j), SOURCE_ID, atlas_coords)
+		
 func erase_cell(i:int, j:int) -> void:
-	var source_id = 0
-	var atlas_coords = Vector2i(1, 0)
-	_tile.set_cell(eTileLayer.BACKGROUND, Vector2i(i, j), source_id, atlas_coords)
+	_tile.set_cell(eTileLayer.BACKGROUND, Vector2i(i, j), SOURCE_ID, ATLAS_COORDS_BLANK)
+
+## スイッチの状態チェック.
+func switch_check(i:int, j:int) -> bool:
+	var v = get_cell(i, j)
+	if is_switch(v) == false:
+		return false# スイッチでない.
+	return v%2 == 1
+
+## スイッチON.
+func switch_on(i:int, j:int) -> void:
+	var v = get_cell(i, j)
+	if is_switch(v) == false:
+		return # スイッチでない.
+	if v%2 == 0:
+		toggle_switch(i, j) # OFF -> ON
+	
+## スイッチOFF.
+func switch_off(i:int, j:int) -> void:
+	var v = get_cell(i, j)
+	if is_switch(v) == false:
+		return # スイッチでない.
+	if v%2 == 1:
+		toggle_switch(i, j) # ON -> OFF
+
+## スイッチのON/OFF切り替え.
+func toggle_switch(i:int, j:int) -> void:
+	var v = get_cell(i, j)
+	if is_switch(v) == false:
+		return # スイッチでない.
+	if v%2 == 0:
+		v += 1 # OFF -> ON
+	else:
+		v -= 1 # ON -> OFF
+	
+	set_cell(i, j, v)
 
 ## 移動可能な位置かどうか.
 func can_move(i:int, j:int) -> bool:

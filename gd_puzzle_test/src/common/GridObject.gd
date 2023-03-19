@@ -10,9 +10,9 @@ class_name GridObject
 # consts.
 # --------------------------------------
 enum eState {
-	STANDBY,
-	MOVING,
-	CONVEYOR_BELT,
+	STANDBY, # 待機中.
+	MOVING, # 移動中.
+	CONVEYOR_BELT, # ベルトコンベアで移動中.
 }
 
 enum eMove {
@@ -20,6 +20,12 @@ enum eMove {
 	LINEAR,
 }
 
+func is_moving(state:eState) -> bool:
+	var tbl = [
+		eState.MOVING, # 移動中.
+		eState.CONVEYOR_BELT, # ベルトコンベアで移動中.
+	]
+	return state in tbl
 # ---------------------------------------
 # class.
 # ---------------------------------------
@@ -168,6 +174,11 @@ func post_update() -> void:
 			# ピットを踏んだ.
 			if has_method("cb_stomp_pit"):
 				call("cb_stomp_pit")
+		var v = Field.get_cell(_point.x, _point.y)
+		if Field.switch_check(_point.x, _point.y) == false:
+			Field.switch_on(_point.x, _point.y)
+		if is_moving(_state_obj.prev):
+			Field.switch_off(_prev_pos.x, _prev_pos.y)
 
 ## ピットを踏んだかどうか.
 func is_stomp_pit() -> bool:

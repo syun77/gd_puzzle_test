@@ -145,6 +145,7 @@ func _put_key() -> void:
 		# 移動可能なので置ける.
 		_key.carried = false
 		_key.set_pos(pos.x, pos.y, false)
+		Field.switch_on(pos.x, pos.y) # スイッがあったら押す.
 		_key = null
 
 ## 移動.
