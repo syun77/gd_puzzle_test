@@ -267,7 +267,7 @@ func toggle_pit(i:int, j:int) -> void:
 	set_cell(i, j, v)
 
 ## 移動可能な位置かどうか.
-func can_move(i:int, j:int) -> bool:
+func can_move(i:int, j:int, use_block_map:bool=false) -> bool:
 	var v = get_cell(i, j)
 	if v in [eTile.BLOCK, eTile.LOCK]:
 		return false # 壁がある.
@@ -277,6 +277,10 @@ func can_move(i:int, j:int) -> bool:
 	
 	if exists_battery(i, j):
 		return false # 砲がある.
+		
+	if use_block_map:
+		if bitchk_block_map(i, j):
+			return false # カギがある
 	
 	return true
 
@@ -312,7 +316,8 @@ func search_crate(i:int, j:int):
 ## 荷物を動かせるかどうか.
 func can_move_crate(i:int, j:int, dx:int, dy:int) -> bool:
 	# 移動先をチェックする.
-	if can_move(i+dx, j+dy) == false:
+	var use_block_map = true # block_mapの判定を使う.
+	if can_move(i+dx, j+dy, use_block_map) == false:
 		return false # 動かせない.
 	
 	if exists_crate(i, j) == false:

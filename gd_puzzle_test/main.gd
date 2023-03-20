@@ -185,6 +185,14 @@ func _update_main(delta:float) -> void:
 	# ブロックマップの初期化.
 	Field.clear_block_map()
 	
+	# カギの位置を調べる.
+	for obj in _obj_layer.get_children():
+		if not obj is Key:
+			continue # カギでない
+		if obj.carried:
+			continue # 運ばれていない.
+		Field.biton_block_map(obj._point.x, obj._point.y)
+	
 	# オブジェクトの更新.
 	_update_objects(delta)
 	
