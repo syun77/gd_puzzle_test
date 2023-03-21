@@ -38,14 +38,16 @@ enum eTile {
 	
 	BLOCK = 1, # 壁
 	LOCK  = 2, # カギのかかった扉.
-	FENCE_ON = 3, # フェンス.
-	FENCE_OFF = 4, # フェンス(無効).
 	
 	# ベルトコンベア.
 	CONVEYOR_BELT_L = 3, # 左.
 	CONVEYOR_BELT_U = 4, # 上.
 	CONVEYOR_BELT_R = 5, # 右.
 	CONVEYOR_BELT_D = 6, # 下.
+	
+	# フェンス.
+	FENCE_ON = 7, # フェンス.
+	FENCE_OFF = 8, # フェンス(無効).
 	
 	# ピット
 	PIT_OFF = 10, # 無効.
@@ -454,9 +456,21 @@ func clear_block_map() -> void:
 ## ブロックマップのフラグを立てる.
 func biton_block_map(i:int, j:int) -> void:
 	_block_map.setv(i, j, 1)
+func bitset_block_map(i:int, j:int, v:int) -> void:
+	_block_map.setv(i, j, v)
 ## 指定の位置にフラグが立っているかどうかを調べる.
 func bitchk_block_map(i:int, j:int) -> bool:
 	return _block_map.getv(i, j) != 0
+## 指定の値のみ対象とする.
+func bitchk_block_map_ex(i:int, j:int, v:int) -> bool:
+	var id = _block_map.getv(i, j)
+	match id:
+		0:
+			return false # なにもない.
+		v:
+			return false # 指定の値を含めない.
+		_:
+			return true
 
 
 # ---------------------------------------

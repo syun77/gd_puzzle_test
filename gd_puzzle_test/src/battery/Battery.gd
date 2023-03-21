@@ -101,7 +101,8 @@ func _draw() -> void:
 	while Field.is_outside(pos.x, pos.y) == false:
 		if Field.can_move(pos.x, pos.y) == false:
 			break # 壁があるので終了
-		if Field.bitchk_block_map(pos.x, pos.y):
+		# "2" を除外して
+		if Field.bitchk_block_map_ex(pos.x, pos.y, 2):
 			break # 壁があるので終了
 		
 		# レーザーマップを設定する.

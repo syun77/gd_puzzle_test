@@ -187,7 +187,9 @@ func _update_main(delta:float) -> void:
 	
 	# 移動不可情報の更新.
 	## プレイヤーの位置に動けないようにしておく
-	Field.biton_block_map(_player._point.x, _player._point.y)
+	## プレイヤーは特殊対応.
+	Field.bitset_block_map(_player._point.x, _player._point.y, 2)
+	
 	## カギの位置を調べる.
 	for obj in _obj_layer.get_children():
 		if not obj is Key:
