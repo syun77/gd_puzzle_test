@@ -199,7 +199,7 @@ func is_outside(i:int, j:int) -> bool:
 	return false
 
 func get_cell(i:int, j:int) -> int:
-	var data = _tile.get_cell_tile_data(eTileLayer.BACKGROUND, Vector2i(i, j))
+	var data = _tile.get_cell_tile_data(eTileLayer.OBJECT, Vector2i(i, j))
 	if data == null:
 		return eTile.NONE
 	var v:int = data.get_custom_data(CUSTOM_NAME)
@@ -209,10 +209,10 @@ func set_cell(i:int, j:int, v:eTile) -> void:
 	if not v in ATLAS_COORDS_TBL:
 		assert(0, "不明なタイルID:%d"%v)
 	var atlas_coords = ATLAS_COORDS_TBL[v]
-	_tile.set_cell(eTileLayer.BACKGROUND, Vector2i(i, j), SOURCE_ID, atlas_coords)
+	_tile.set_cell(eTileLayer.OBJECT, Vector2i(i, j), SOURCE_ID, atlas_coords)
 		
 func erase_cell(i:int, j:int) -> void:
-	_tile.set_cell(eTileLayer.BACKGROUND, Vector2i(i, j), SOURCE_ID, ATLAS_COORDS_BLANK)
+	_tile.set_cell(eTileLayer.OBJECT, Vector2i(i, j), SOURCE_ID, ATLAS_COORDS_BLANK)
 
 ## スイッチの状態チェック.
 func switch_check(i:int, j:int) -> bool:
@@ -359,7 +359,7 @@ func search_random_none() -> Vector2i:
 		for i in range(TILE_WIDTH):
 			var canPut = true
 			for k in range(Field.eTileLayer.MAX):
-				var data:TileData = _tile.get_cell_tile_data(Field.eTileLayer.BACKGROUND, Vector2i(i, j))
+				var data:TileData = _tile.get_cell_tile_data(Field.eTileLayer.OBJECT, Vector2i(i, j))
 				var v = data.get_custom_data(Field.CUSTOM_NAME)
 				if v == eTile.NONE:
 					canPut = false # 何かがある
