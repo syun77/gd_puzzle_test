@@ -87,6 +87,12 @@ func _ready() -> void:
 
 ## 更新 > 停止中.
 func _update_standby(delta:float) -> void:
+	if check_conveyor_belt():
+		# ベルトコンベアを踏んだ.
+		_timer = 0
+		_state = eState.CONVEYOR_BELT
+		return
+				
 	if _request_move:
 		_request_move = false
 		_timer = 0

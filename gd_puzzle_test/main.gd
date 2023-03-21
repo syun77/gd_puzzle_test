@@ -185,7 +185,10 @@ func _update_main(delta:float) -> void:
 	# ブロックマップの初期化.
 	Field.clear_block_map()
 	
-	# カギの位置を調べる.
+	# 移動不可情報の更新.
+	## プレイヤーの位置に動けないようにしておく
+	Field.biton_block_map(_player._point.x, _player._point.y)
+	## カギの位置を調べる.
 	for obj in _obj_layer.get_children():
 		if not obj is Key:
 			continue # カギでない

@@ -158,7 +158,8 @@ func check_conveyor_belt() -> bool:
 	
 	var dir = Field.conveyor_belt_to_dir(v)
 	var next = _point + Direction.to_vector(dir)
-	if Field.can_move(next.x, next.y) == false:
+	var use_block_map = true
+	if Field.can_move(next.x, next.y, use_block_map) == false:
 		return false # 移動できない場合はベルトコンベア無効.
 	
 	_prev_pos = _point
