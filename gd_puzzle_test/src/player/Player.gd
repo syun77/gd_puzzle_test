@@ -110,6 +110,11 @@ func _update_standby(delta:float) -> void:
 		if is_instance_valid(_key):
 			# 鍵を持っていたら地面に置く.
 			_put_key()
+		
+		# 前方の座標.
+		var forward = _point + Direction.to_vector(_dir)
+		# レバースイッチがあったら切り替え.
+		Field.toggle_lever_switch(forward.x, forward.y)
 
 
 ## カギを持っているときの更新

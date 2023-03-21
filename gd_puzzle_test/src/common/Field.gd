@@ -38,6 +38,8 @@ enum eTile {
 	
 	BLOCK = 1, # 壁
 	LOCK  = 2, # カギのかかった扉.
+	FENCE_ON = 3, # フェンス.
+	FENCE_OFF = 4, # フェンス(無効).
 	
 	# ベルトコンベア.
 	CONVEYOR_BELT_L = 3, # 左.
@@ -64,6 +66,8 @@ enum eTile {
 	SWITCH_YELLOW_ON = 29, # 有効.
 	SWITCH_OFF = 30, # 無効.
 	SWITCH_ON = 31, # 有効.
+	LEVER_SWITCH_OFF = 32, # レバースイッチOFF.
+	LEVER_SWITCH_ON = 33, # レバースイッチON.
 	
 	# 荷物
 	CRATE1 = 50,
@@ -91,10 +95,12 @@ enum eTile {
 }
 
 # ピットを切り替えるスイッチ.
-const SWITCH_PIT_TBL = [eTile.SWITCH_OFF, eTile.SWITCH_ON]
+const SWITCH_PIT_TBL = [eTile.SWITCH_OFF, eTile.SWITCH_ON, eTile.LEVER_SWITCH_OFF, eTile.LEVER_SWITCH_ON]
 
 ## Atlas coords.
 const ATLAS_COORDS_BLANK = Vector2i(1, 0)
+const ATLAS_COORDS_FENCE_ON = Vector2i(7, 1)
+const ATLAS_COORDS_FENCE_OFF = Vector2i(7, 2)
 const ATLAS_COORDS_PIT_OFF = Vector2i(3, 1)
 const ATLAS_COORDS_PIT_ON = Vector2i(4, 1)
 const ATLAS_COORDS_PIT2_OFF = Vector2i(5, 1)
@@ -111,9 +117,14 @@ const ATLAS_COORDS_SWITCH_YELLOW_OFF = Vector2i(3, 6)
 const ATLAS_COORDS_SWITCH_YELLOW_ON = Vector2i(4, 6)
 const ATLAS_COORDS_SWITCH_OFF = Vector2i(3, 7)
 const ATLAS_COORDS_SWITCH_ON = Vector2i(4, 7)
+const ATLAS_COORDS_LEVER_SWITCH_OFF = Vector2i(5, 2)
+const ATLAS_COORDS_LEVER_SWITCH_ON = Vector2i(6, 2)
 
 const ATLAS_COORDS_TBL = {
 	eTile.BLANK: ATLAS_COORDS_BLANK,
+	# フェンス.
+	eTile.FENCE_OFF: ATLAS_COORDS_FENCE_OFF,
+	eTile.FENCE_ON: ATLAS_COORDS_FENCE_ON,
 	# ピット.
 	eTile.PIT_OFF: ATLAS_COORDS_PIT_OFF,
 	eTile.PIT_ON: ATLAS_COORDS_PIT_ON,
@@ -132,6 +143,9 @@ const ATLAS_COORDS_TBL = {
 	eTile.SWITCH_YELLOW_ON: ATLAS_COORDS_SWITCH_ON,
 	eTile.SWITCH_OFF: ATLAS_COORDS_SWITCH_OFF, 
 	eTile.SWITCH_ON: ATLAS_COORDS_SWITCH_ON, 
+	# レバースイッチ.
+	eTile.LEVER_SWITCH_OFF: ATLAS_COORDS_LEVER_SWITCH_OFF,
+	eTile.LEVER_SWITCH_ON: ATLAS_COORDS_LEVER_SWITCH_ON,
 }
 
 ## ベルトコンベアかどうか.
@@ -168,6 +182,22 @@ func is_switch(tile:eTile) -> bool:
 		eTile.SWITCH_YELLOW_ON, # 有効.
 		eTile.SWITCH_OFF, # 無効.
 		eTile.SWITCH_ON, # 有効.
+	]
+	return tile in tbl
+
+## レバースイッチかどうか.
+func is_lever_switch(tile:eTile) -> bool:
+	var tbl = [
+		eTile.LEVER_SWITCH_OFF,
+		eTile.LEVER_SWITCH_ON,
+	]
+	return tile in tbl
+	
+## フェンスかどうか.
+func is_fence(tile:eTile) -> bool:
+	var tbl = [
+		eTile.FENCE_OFF,
+		eTile.FENCE_ON,
 	]
 	return tile in tbl
 
@@ -251,8 +281,37 @@ func toggle_switch(i:int, j:int) -> void:
 		# ピットの状態を切り替え.
 		for y in range(TILE_HEIGHT):
 			for x in range(TILE_WIDTH):
-				toggle_pit(x, y)
+				toggle_fence(x, y)
 	
+	set_cell(i, j, v)
+
+## レバースイッチ切り替え.
+func toggle_lever_switch(i:int, j:int) -> void:
+	var v = get_cell(i, j)
+	if is_lever_switch(v) == false:
+		return # レバースイッチでない.
+	if v%2 == 0:
+		v += 1 # OFF -> ON
+	else:
+		v -= 1 # ON -> OFF
+	
+	if v in SWITCH_PIT_TBL:
+		# ピットの状態を切り替え.
+		for y in range(TILE_HEIGHT):
+			for x in range(TILE_WIDTH):
+				toggle_pit(x, y)
+				
+	set_cell(i, j, v)
+
+## フェンスの状態をトグルする.
+func toggle_fence(i:int, j:int) -> void:
+	var v = get_cell(i, j)
+	if is_fence(v) == false:
+		return # フェンスでない.
+	if v == eTile.FENCE_OFF:
+		v = eTile.FENCE_ON
+	else:
+		v = eTile.FENCE_OFF
 	set_cell(i, j, v)
 
 ## ピットの状態をトグルする.
@@ -269,7 +328,7 @@ func toggle_pit(i:int, j:int) -> void:
 ## 移動可能な位置かどうか.
 func can_move(i:int, j:int, use_block_map:bool=false) -> bool:
 	var v = get_cell(i, j)
-	if v in [eTile.BLOCK, eTile.LOCK]:
+	if v in [eTile.BLOCK, eTile.LOCK, eTile.LEVER_SWITCH_OFF, eTile.LEVER_SWITCH_ON, eTile.FENCE_ON]:
 		return false # 壁がある.
 	
 	if exists_crate(i, j):
